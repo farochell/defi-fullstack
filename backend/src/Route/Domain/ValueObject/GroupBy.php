@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 namespace App\Route\Domain\ValueObject;
+
 enum GroupBy: string
 {
     case DAY = 'day';

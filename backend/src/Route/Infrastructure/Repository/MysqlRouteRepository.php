@@ -48,14 +48,14 @@ class MysqlRouteRepository extends BaseRepository implements RouteRepositoryInte
     public function getAnalyticDistances(
         ?\DateTimeImmutable $from,
         ?\DateTimeImmutable $to,
-        GroupBy $groupBy
+        ?GroupBy $groupBy
     ): array {
         $conn = $this->getEntityManager()->getConnection();
-
         // Si from ou to manquent, récupérer la période complète disponible en base
         if (null === $from || null === $to) {
             $minMaxSql = 'SELECT MIN(created_at) AS min_dt, MAX(created_at) AS max_dt FROM routes';
             $minMax = $conn->fetchAssociative($minMaxSql);
+
 
             if (!$minMax || $minMax['min_dt'] === null || $minMax['max_dt'] === null) {
                 return []; // Pas de données

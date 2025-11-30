@@ -5,14 +5,15 @@
  */
 declare(strict_types=1);
 
-namespace App\Route\Application\GetAnalyticDistance;
+namespace App\Route\Application\GetAnalyticDistances;
 
 use App\Shared\Domain\Bus\Query\Query;
 
-class GetAnalyticDistanceQuery implements Query {
+class GetAnalyticDistancesQuery implements Query
+{
     public function __construct(
         public readonly ?string $from = null,
         public readonly ?string $to = null,
-        public readonly ?string $groupBy = null
+        public readonly ?string $groupBy = null,
     ) {}
 }

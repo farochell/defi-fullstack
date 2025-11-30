@@ -1,0 +1,48 @@
+services:
+  php_test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      APP_ENV: test
+      DATABASE_URL: "mysql://test_user:test_pass@db_test:3306/test_db?serverVersion=mariadb-10.6&charset=utf8mb4"
+    depends_on:
+      db_test:
+        condition: service_healthy
+    networks:
+      - backend_test
+    command: >
+      sh -c "
+        echo '⏳ Waiting for DB...' &&
+        sleep 5 &&
+        composer install --no-interaction --no-progress &&
+        php bin/console doctrine:database:create --env=test --if-not-exists &&
+        php bin/console doctrine:migrations:migrate --no-interaction --env=test &&
+        ./vendor/bin/phpunit
+      "
+
+  db_test:
+    image: mariadb:10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_pass
+    volumes:
+      - db_test_data:/var/lib/mysql
+    networks:
+      - backend_test
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_test_data:
+
+networks:
+  backend_test:
+    driver: bridge
