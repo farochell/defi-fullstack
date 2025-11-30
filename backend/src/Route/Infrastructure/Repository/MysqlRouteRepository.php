@@ -10,6 +10,7 @@ namespace App\Route\Infrastructure\Repository;
 use App\Route\Domain\Entity\Route;
 use App\Route\Domain\Entity\Station;
 use App\Route\Domain\Repository\RouteRepositoryInterface;
+use App\Route\Domain\ValueObject\GroupBy;
 use App\Route\Infrastructure\Doctrine\Mapping\DoctrineRoute;
 use App\Shared\Domain\Exception\EntityPersistenceException;
 use App\Shared\Infrastructure\Repository\BaseRepository;
@@ -42,6 +43,76 @@ class MysqlRouteRepository extends BaseRepository implements RouteRepositoryInte
                 'data' => $this->serializeEntity($route)
             ]);
         }
+    }
+
+    public function getAnalyticDistances(
+        ?\DateTimeImmutable $from,
+        ?\DateTimeImmutable $to,
+        GroupBy $groupBy
+    ): array {
+        $conn = $this->getEntityManager()->getConnection();
+
+        // Si from ou to manquent, récupérer la période complète disponible en base
+        if (null === $from || null === $to) {
+            $minMaxSql = 'SELECT MIN(created_at) AS min_dt, MAX(created_at) AS max_dt FROM routes';
+            $minMax = $conn->fetchAssociative($minMaxSql);
+
+            if (!$minMax || $minMax['min_dt'] === null || $minMax['max_dt'] === null) {
+                return []; // Pas de données
+            }
+
+            $from = $from ?? new \DateTimeImmutable($minMax['min_dt']);
+            $to = $to ?? new \DateTimeImmutable($minMax['max_dt']);
+        }
+
+        // Normaliser les bornes (inclusives)
+        $fromStr = $from->format('Y-m-d 00:00:00');
+        $toStr = $to->format('Y-m-d 23:59:59');
+
+        // Déterminer l'expression de groupement
+        $groupExpr = match ($groupBy) {
+            GroupBy::DAY => "DATE_FORMAT(created_at, '%Y-%m-%d')",
+            GroupBy::MONTH => "DATE_FORMAT(created_at, '%Y-%m')",
+            GroupBy::YEAR => "DATE_FORMAT(created_at, '%Y')",
+            GroupBy::NONE => null,
+        };
+
+        // Construire la requête SQL
+        $selectFields = [
+            'analytic_code AS analyticCode',
+            'SUM(distance_km) AS totalDistanceKm',
+            'DATE(MIN(created_at)) AS periodStart',
+            'DATE(MAX(created_at)) AS periodEnd'
+        ];
+
+        $groupByFields = ['analytic_code'];
+        $orderByFields = ['analytic_code'];
+
+        if ($groupExpr !== null) {
+            array_splice($selectFields, 1, 0, ["{$groupExpr} AS `group`"]);
+            $groupByFields[] = '`group`';
+            $orderByFields[] = '`group`';
+        }
+
+        $sql = sprintf(
+            'SELECT %s FROM routes WHERE created_at BETWEEN :from AND :to GROUP BY %s ORDER BY %s',
+            implode(', ', $selectFields),
+            implode(', ', $groupByFields),
+            implode(', ', $orderByFields)
+        );
+
+        $rows = $conn->fetchAllAssociative($sql, ['from' => $fromStr, 'to' => $toStr]);
+
+        // Mapper les résultats
+        return array_map(static function (array $r) use ($groupExpr): array {
+            return [
+                'analyticCode' => (string) $r['analyticCode'],
+                'totalDistanceKm' => (float) $r['totalDistanceKm'],
+                'periodStart' => (string) $r['periodStart'],
+                'periodEnd' => (string) $r['periodEnd'],
+                'group' => $groupExpr !== null ? (string) $r['group'] : null,
+            ];
+        }, $rows);
     }
 
     private function toDoctrineEntity(Route $route): DoctrineRoute {
