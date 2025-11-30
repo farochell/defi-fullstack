@@ -18,22 +18,22 @@ class DoctrineRoute {
     #[ORM\Column(name: 'id', type: 'route_id', unique: true)]
     public RouteId $id;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', name: 'from_station')]
     public string $fromStation;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(name: 'to_station', type: 'string')]
     public string $toStation;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(name: 'analytic_code', type: 'string')]
     public string $analyticCode;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(name: 'distance_km', type: 'float')]
     public float $distanceKm;
 
     /**
      * @var array<Station>
      */
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(name: 'path', type: 'json')]
     public array $path;
 
     #[ORM\Column(type: 'datetime_immutable')]

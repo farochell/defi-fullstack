@@ -22,9 +22,10 @@ class GetAnalyticDistancesQueryHandler implements QueryHandler {
 
         $from = $query->from ? new \DateTimeImmutable($query->from) : null;
          $to = $query->to ? new \DateTimeImmutable($query->to) : null;
+
          $groupBy = $query->groupBy ? GroupBy::tryFrom($query->groupBy) : null;
+
          $result =  $this->routeRepository->getAnalyticDistances($from, $to, $groupBy);
-         dd($result);
 
     }
 }

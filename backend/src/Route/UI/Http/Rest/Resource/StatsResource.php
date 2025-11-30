@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace App\Route\UI\Http\Rest\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
@@ -19,10 +20,12 @@ use App\Route\UI\Http\Rest\Controller\GetAnalyticDistancesController;
             uriTemplate: '/stats/distances',
             status: 200,
             controller: GetAnalyticDistancesController::class,
-           paginationEnabled: false,
-           output: false,
+            paginationEnabled: false,
+            output: false,
             read: false,
-            )
+            name: 'get_stats_distances'  // Important !
+        )
+
     ]
 )]
 class StatsResource {}

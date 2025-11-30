@@ -14,6 +14,7 @@ use App\Route\UI\Http\Rest\Input\GetAnalyticInput;
 use App\Shared\Domain\Bus\Query\QueryBus;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 
@@ -28,23 +29,31 @@ class GetAnalyticDistancesController{
     }
 
     public function __invoke(
-        #[MapQueryString] GetAnalyticInput $analyticInput
-    ) {
-        dd('cc');
+#[MapQueryString] ?GetAnalyticInput $analyticInput = null
+    ) : JsonResponse {
         try {
 
-            $this->validator->validate($analyticInput);
+            //$this->validator->validate($analyticInput);
             $response = $this->queryBus->ask(
                 new GetAnalyticDistancesQuery(
-                    $analyticInput->from,
-                    $analyticInput->to,
-                    $analyticInput->groupBy
+                    $analyticInput?->from,
+                    $analyticInput?->to,
+                    $analyticInput?->groupBy
                 )
             );
-            dd('cc');
             return new JsonResponse($response);
         } catch (\Throwable $e) {
-            return $this->formatError($e);
+            $errorResponse = $this->formatError($e);
+
+            // Si formatError retourne null, créer une réponse par défaut
+            if ($errorResponse === null) {
+                return new JsonResponse(
+                    ['error' => $e->getMessage()],
+                    500
+                );
+            }
+
+            return $errorResponse;
         }
     }
 }

@@ -17,6 +17,7 @@ services:
        App\Shared\Domain\Bus\Query\QueryHandler:
            tags:
                - { name: 'messenger.message_handler', bus: 'query.bus' }
+               - { name: 'app.query_handler' }
 
        App\Shared\Domain\Bus\Command\CommandHandler:
            tags:

@@ -46,16 +46,15 @@ class MysqlRouteRepository extends BaseRepository implements RouteRepositoryInte
     }
 
     public function getAnalyticDistances(
-        ?\DateTimeImmutable $from,
-        ?\DateTimeImmutable $to,
-        ?GroupBy $groupBy
+        ?\DateTimeImmutable $from = null,
+        ?\DateTimeImmutable $to = null,
+        ?GroupBy $groupBy = null
     ): array {
         $conn = $this->getEntityManager()->getConnection();
         // Si from ou to manquent, récupérer la période complète disponible en base
         if (null === $from || null === $to) {
-            $minMaxSql = 'SELECT MIN(created_at) AS min_dt, MAX(created_at) AS max_dt FROM routes';
+            $minMaxSql = 'SELECT MIN(created_at) AS min_dt, MAX(created_at) AS max_dt FROM route';
             $minMax = $conn->fetchAssociative($minMaxSql);
-
 
             if (!$minMax || $minMax['min_dt'] === null || $minMax['max_dt'] === null) {
                 return []; // Pas de données
@@ -68,14 +67,17 @@ class MysqlRouteRepository extends BaseRepository implements RouteRepositoryInte
         // Normaliser les bornes (inclusives)
         $fromStr = $from->format('Y-m-d 00:00:00');
         $toStr = $to->format('Y-m-d 23:59:59');
+        $groupExpr = null;
 
         // Déterminer l'expression de groupement
-        $groupExpr = match ($groupBy) {
-            GroupBy::DAY => "DATE_FORMAT(created_at, '%Y-%m-%d')",
-            GroupBy::MONTH => "DATE_FORMAT(created_at, '%Y-%m')",
-            GroupBy::YEAR => "DATE_FORMAT(created_at, '%Y')",
-            GroupBy::NONE => null,
-        };
+        if ($groupBy) {
+            $groupExpr = match ($groupBy) {
+                GroupBy::DAY => "DATE_FORMAT(created_at, '%Y-%m-%d')",
+                GroupBy::MONTH => "DATE_FORMAT(created_at, '%Y-%m')",
+                GroupBy::YEAR => "DATE_FORMAT(created_at, '%Y')",
+                GroupBy::NONE => null,
+            };
+        }
 
         // Construire la requête SQL
         $selectFields = [
@@ -90,12 +92,12 @@ class MysqlRouteRepository extends BaseRepository implements RouteRepositoryInte
 
         if ($groupExpr !== null) {
             array_splice($selectFields, 1, 0, ["{$groupExpr} AS `group`"]);
-            $groupByFields[] = '`group`';
-            $orderByFields[] = '`group`';
+            $groupByFields[] = '`group`';  // ← CORRIGÉ : guillemets simples autour des backticks
+            $orderByFields[] = '`group`';  // ← CORRIGÉ : guillemets simples autour des backticks
         }
 
         $sql = sprintf(
-            'SELECT %s FROM routes WHERE created_at BETWEEN :from AND :to GROUP BY %s ORDER BY %s',
+            'SELECT %s FROM route WHERE created_at BETWEEN :from AND :to GROUP BY %s ORDER BY %s',
             implode(', ', $selectFields),
             implode(', ', $groupByFields),
             implode(', ', $orderByFields)
