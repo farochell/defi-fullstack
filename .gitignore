@@ -9,3 +9,4 @@
 ###> phpstan/phpstan ###
 /backendphpstan.neon
 ###< phpstan/phpstan ###
+/backend/config/jwt/*.pem
