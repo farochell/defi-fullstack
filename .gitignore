@@ -6,3 +6,6 @@
 /backend/public/bundles/
 /backend/var/
 /backend/vendor/
+###> phpstan/phpstan ###
+/backendphpstan.neon
+###< phpstan/phpstan ###
