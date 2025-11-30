@@ -7,15 +7,21 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "api-platform/doctrine-orm": "^4.2",
         "api-platform/symfony": "^4.2",
+        "doctrine/doctrine-bundle": "*",
+        "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.5",
+        "lambdish/phunctional": "^2.1",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.4.*",
         "symfony/messenger": "7.4.*",
+        "symfony/monolog-bundle": "^4.0",
         "symfony/runtime": "7.4.*",
         "symfony/security-bundle": "7.4.*",
+        "symfony/serializer": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
         "symfony/uid": "7.4.*",
         "symfony/validator": "7.4.*",
@@ -72,7 +78,13 @@
         }
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.4",
+        "fakerphp/faker": "^1.24",
         "phpstan/phpstan": "^2.1",
-        "symfony/maker-bundle": "^1.65"
+        "phpunit/phpunit": "^12.4",
+        "symfony/browser-kit": "7.4.*",
+        "symfony/css-selector": "7.4.*",
+        "symfony/maker-bundle": "^1.65",
+        "symfony/var-dumper": "7.4.*"
     }
 }

@@ -1,7 +1,14 @@
 api_platform:
-    title: Hello API Platform
+    title: Defi Fullstack
+    use_symfony_listeners: true
     version: 1.0.0
     defaults:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Route/UI/Http/Rest/'
+    formats:
+        json: [ 'application/json' ]
+        jsonld: [ 'application/ld+json' ]
