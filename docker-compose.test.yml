@@ -1,8 +1,0 @@
-services:
-    database_test:
-        image: mariadb:10.11
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: test_db
-        ports:
-            - "3307:3306"  # ⚠️ port différent pour éviter les conflits

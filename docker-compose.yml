@@ -74,9 +74,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/var/www/html
-    environment:
-      - APP_ENV=dev
-      - DATABASE_URL=mysql://symfony:password@db:3306/symfony?serverVersion=mariadb-10.6.24&charset=utf8mb4
     networks:
       - web
       - backend
@@ -84,6 +81,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
 
   # Nginx (serveur web pour le backend)
   nginx:
